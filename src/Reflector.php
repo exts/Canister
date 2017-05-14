@@ -199,13 +199,12 @@ class Reflector
             } elseif($parameter->getClass() !== null) {
 
                 $parameter_class = $parameter->getClass();
+                $parameter_class_name = $parameter_class->getName();
 
-                //check cache container to see if we've already called this already
-                if(!$this->container->isFactory($parameter_class->getName())) {
-                    $parameters[] = $this->resolveClassFromCache($parameter_class->getName(), $parameter_class);
-                } else {
-                    //resolve class and all it's parameters which should be passed as a parameter
-                    $parameters[] = $this->resolveClass($parameter_class);
+                try {
+                    $parameters[] = $this->container->get($parameter_class_name);
+                } catch(\Exception $e) {
+                    $parameters[] = null;
                 }
 
             } elseif($parameter->isCallable()) {

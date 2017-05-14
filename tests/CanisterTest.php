@@ -151,4 +151,24 @@ class CanisterTest extends TestCase
 
         $this->assertEquals(26, $container->get('examplex'));
     }
+
+    public function testCallingContainerFromSharedCallable()
+    {
+        $container = new Canister;
+
+        $container['testing'] = [1,2,3,4];
+
+        $container->share('example', function(Canister $c) {
+            foreach($c['testing'] as $number) {
+                yield $number;
+            }
+        });
+
+        $count = 0;
+        foreach($container->get('example') as $value) {
+            $count += $value;
+        }
+
+        $this->assertEquals(10, $count);
+    }
 }

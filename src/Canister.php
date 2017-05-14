@@ -38,6 +38,9 @@ class Canister extends Container implements CanisterInterface
 
         $this->reflector = $reflector ?? new Reflector();
         $this->reflector->setContainer($this);
+
+        //store reference of the container inside itself, can be overridden
+        $this->instance($this);
     }
 
     /**
@@ -62,14 +65,6 @@ class Canister extends Container implements CanisterInterface
             throw new OffsetNotValid(sprintf("Offset must be a string, %s passed", gettype($key)));
         }
 
-        //get alias
-        $alias = $this->isAlias($key) ? $this->getAlias($key) : $key;
-
-        //automatically resolve classes if they exist even if they don't exist in our reflector cache
-        if(!$this->has($key) && class_exists($alias)) {
-            return $this->reflector->resolveClassString($alias, $this->isFactory($alias));
-        }
-
         //automatically resolve factory callables if they exist
         if(!$this->has($key) && $this->isFactory($key) && is_callable(($factory = $this->getFactory($key)))) {
             return $this->reflector->resolveCallableString($key, $factory, true);
@@ -80,8 +75,43 @@ class Canister extends Container implements CanisterInterface
             return $this->reflector->resolveCallableString($key, $shared);
         }
 
+        //get alias
+        $alias = $this->isAlias($key) ? $this->getAlias($key) : $key;
+
+        //automatically resolve classes if they exist even if they don't exist in our reflector cache
+        if(!$this->has($key) && class_exists($alias)) {
+            return $this->reflector->resolveClassString($alias, $this->isFactory($alias));
+        }
+
         //return basic container value
         return $this->offsetGet($key);
+    }
+
+    /**
+     * @param $classOrInstance
+     *
+     * @return bool
+     * @throws OffsetNotValid
+     */
+    public function instance($classOrInstance)
+    {
+        if(!is_object($classOrInstance) && !is_string($classOrInstance)) {
+            throw new OffsetNotValid("Class or instance you're trying to pass is not a valid string or object");
+        }
+
+        if(is_object($classOrInstance)) {
+            $this[get_class($classOrInstance)] = $classOrInstance;
+            return true;
+        }
+
+        //get alias if it exists
+        $alias = $this->isAlias($classOrInstance) ? $this->getAlias($classOrInstance) : $classOrInstance;
+        if(is_string($alias) && class_exists($alias)) {
+            $this[$classOrInstance] = $this->reflector->resolveClassString($alias, $this->isFactory($alias));
+            return true;
+        }
+
+        return false;
     }
 
     /**

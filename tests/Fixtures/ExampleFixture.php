@@ -1,7 +1,7 @@
 <?php
 namespace Test\Fixtures;
 
-class ExampleFixture
+class ExampleFixture implements ExampleFixtureInterface
 {
     public function foo()
     {

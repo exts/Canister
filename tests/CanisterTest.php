@@ -6,6 +6,7 @@ use Canister\CanisterInterface;
 use function Canister\val;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Test\Fixtures\ExampleAliasDiFixture;
 use Test\Fixtures\ExampleDefinedFixture;
 use Test\Fixtures\ExampleDiFixture;
 use Test\Fixtures\ExampleFactoryFixture;
@@ -13,6 +14,7 @@ use Test\Fixtures\ExampleFactoryForCallableFixture;
 use Test\Fixtures\ExampleFixture;
 use Test\Fixtures\ExampleForSharedCallableFixture;
 use Test\Fixtures\ExampleSharedFixture;
+use Test\Fixtures\ExampleFixtureInterface;
 
 class CanisterTest extends TestCase
 {
@@ -74,6 +76,13 @@ class CanisterTest extends TestCase
         $container->alias('LoL', ExampleFixture::class);
 
         $this->assertInstanceOf(ExampleFixture::class, $container->get('LoL'));
+
+        $container->alias(ExampleFixtureInterface::class, ExampleFixture::class);
+
+        $example = $container->get(ExampleFixtureInterface::class);
+        $example2 = $container->get(ExampleAliasDiFixture::class);
+        $this->assertEquals('bar', $example->foo());
+        $this->assertEquals('bar', $example2->output());
     }
 
     public function testLazyLoadingFactoryClosure()
@@ -170,5 +179,18 @@ class CanisterTest extends TestCase
         }
 
         $this->assertEquals(10, $count);
+    }
+
+    public function testResolvingPhpClass()
+    {
+        $container = new Canister;
+
+        $container->define(\PDO::class, [
+            'dsn' => val('sqlite::memory:'),
+        ]);
+
+        $pdo = $container->get(\PDO::class);
+
+        $this->assertInstanceOf(\PDO::class, $pdo);
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace Test;
+namespace Tests;
 
 use Canister\Canister;
 use Canister\Reflector;

@@ -40,7 +40,7 @@ class Reflector
     /**
      * @param CanisterInterface $container
      */
-    public function setContainer(CanisterInterface $container)
+    public function setContainer(CanisterInterface $container) : void
     {
         $this->container = $container;
     }
@@ -50,7 +50,7 @@ class Reflector
      * @param $value
      * @param null $ttl
      */
-    public function store(string $class, $value, $ttl = null)
+    public function store(string $class, $value, $ttl = null) : void
     {
         $this->cache->set($class, $value, $ttl);
     }
@@ -172,7 +172,7 @@ class Reflector
      *
      * @return array
      */
-    private function resolveParameters(?array $params = [], ?array $definitions = null)
+    private function resolveParameters(?array $params = [], ?array $definitions = null) : array
     {
         $parameters = [];
 
@@ -241,7 +241,7 @@ class Reflector
      *
      * @return \ReflectionClass
      */
-    private function getClass(string $class)
+    private function getClass(string $class) : \ReflectionClass
     {
         return new \ReflectionClass($class);
     }
@@ -251,7 +251,7 @@ class Reflector
      *
      * @return \ReflectionFunction
      */
-    private function getCallable(callable $callable)
+    private function getCallable(callable $callable) : \ReflectionFunction
     {
         return new \ReflectionFunction($callable);
     }

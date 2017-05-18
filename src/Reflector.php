@@ -102,7 +102,7 @@ class Reflector
             return $this->cache->get(self::CACHE_CALLABLE . $name);
         }
 
-        $callable = $callable ?? $this->getClass($closure);
+        $callable = $callable ?? $this->getCallable($closure);
         $resolved = $this->resolveCallable($name, $callable);
 
         //cache closure

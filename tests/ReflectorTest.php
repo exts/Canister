@@ -82,4 +82,15 @@ class ReflectorTest extends TestCase
             $reflector->resolveClassString(ExampleDiFixture::class)
         );
     }
+
+    public function testResolveOfRawClosure()
+    {
+        $reflector = new Reflector();
+
+        $results = $reflector->resolveCallable(null, function($a, $b) {
+            return $a * $b;
+        }, [11, 12]);
+
+        $this->assertEquals(132, $results);
+    }
 }

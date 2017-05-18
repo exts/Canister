@@ -64,52 +64,49 @@ class Reflector
      */
     public function resolveCallableString(string $name, callable $closure, $factory = false)
     {
-        $callable = $this->getCallable($closure);
-
         if($factory === true) {
-            return $this->resolveCallable($name, $callable);
+            return $this->resolveCallable($name, $closure);
         }
 
-        return $this->resolveCallableFromCache($name, $closure, $callable);
-    }
-
-    /**
-     * @param string|null $name
-     * @param \ReflectionFunction $callable
-     * @param array|null $parameters
-     *
-     * @return mixed
-     */
-    public function resolveCallable(?string $name, \ReflectionFunction $callable, ?array $parameters = null)
-    {
-        $definitions = isset($name) && $this->container->isDefined($name)
-            ? $this->container->getDefiniition($name) : null;
-
-        $parameters = $parameters ?? $this->resolveParameters($callable->getParameters() ?? null, $definitions);
-
-        return $callable->invokeArgs($parameters);
+        return $this->resolveCallableFromCache($name, $closure);
     }
 
     /**
      * @param string $name
      * @param callable $closure
-     * @param null|\ReflectionFunction $callable
      *
      * @return mixed|null
      */
-    public function resolveCallableFromCache(string $name, callable $closure, ?\ReflectionFunction $callable = null)
+    public function resolveCallableFromCache(string $name, callable $closure)
     {
         if($this->cache->has(self::CACHE_CALLABLE . $name)) {
             return $this->cache->get(self::CACHE_CALLABLE . $name);
         }
 
-        $callable = $callable ?? $this->getCallable($closure);
-        $resolved = $this->resolveCallable($name, $callable);
+        $resolved = $this->resolveCallable($name, $closure);
 
         //cache closure
         $this->store(self::CACHE_CALLABLE . $name, $resolved);
 
         return $resolved;
+    }
+
+    /**
+     * @param string|null $name
+     * @param callable $closure
+     * @param array|null $parameters
+     *
+     * @return mixed
+     */
+    public function resolveCallable(?string $name, callable $closure, ?array $parameters = null)
+    {
+        $definitions = isset($name) && $this->container->isDefined($name)
+            ? $this->container->getDefiniition($name) : null;
+
+        $callable = $this->getCallable($closure);
+        $parameters = $parameters ?? $this->resolveParameters($callable->getParameters() ?? null, $definitions);
+
+        return $callable->invokeArgs($parameters);
     }
 
     /**
@@ -120,45 +117,43 @@ class Reflector
      */
     public function resolveClassString(string $class, $factory = false)
     {
-        $object = $this->getClass($class);
-
         if($factory === true) {
-            return $this->resolveClass($object);
+            return $this->resolveClass($class);
         }
 
-        return $this->resolveClassFromCache($class, $object);
-    }
-
-    /**
-     * @param \ReflectionClass $class
-     *
-     * @return object
-     */
-    public function resolveClass(\ReflectionClass $class)
-    {
-        $definitions = $this->container->isDefined($class->getName())
-            ? $this->container->getDefiniition($class->getName()) : null;
-
-        $constructor_parameters = $class->getConstructor() !== null ? $class->getConstructor()->getParameters() : null;
-        $parameters = $this->resolveParameters($constructor_parameters ?? [], $definitions);
-
-        return $class->newInstanceArgs($parameters);
+        return $this->resolveClassFromCache($class);
     }
 
     /**
      * @param string $class
-     * @param null|\ReflectionClass $object
+     *
+     * @return object
+     */
+    public function resolveClass(string $class)
+    {
+        $object = $this->getClass($class);
+
+        $definitions = $this->container->isDefined($object->getName())
+            ? $this->container->getDefiniition($object->getName()) : null;
+
+        $constructor_parameters = $object->getConstructor() !== null ? $object->getConstructor()->getParameters() : null;
+        $parameters = $this->resolveParameters($constructor_parameters ?? [], $definitions);
+
+        return $object->newInstanceArgs($parameters);
+    }
+
+    /**
+     * @param string $class
      *
      * @return mixed|null|object
      */
-    public function resolveClassFromCache(string $class, ?\ReflectionClass $object = null)
+    public function resolveClassFromCache(string $class)
     {
         if($this->cache->has($class)) {
             return $this->cache->get($class);
         }
 
-        $object = $object ?? $this->getClass($class);
-        $resolved = $this->resolveClass($object);
+        $resolved = $this->resolveClass($class);
 
         //cache class
         $this->store($class, $resolved);

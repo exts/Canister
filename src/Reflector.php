@@ -74,17 +74,18 @@ class Reflector
     }
 
     /**
-     * @param string $name
+     * @param string|null $name
      * @param \ReflectionFunction $callable
+     * @param array|null $parameters
      *
      * @return mixed
      */
-    private function resolveCallable(string $name, \ReflectionFunction $callable)
+    public function resolveCallable(?string $name, \ReflectionFunction $callable, ?array $parameters = null)
     {
-        $definitions = $this->container->isDefined($name)
+        $definitions = isset($name) && $this->container->isDefined($name)
             ? $this->container->getDefiniition($name) : null;
 
-        $parameters = $this->resolveParameters($callable->getParameters() ?? null, $definitions);
+        $parameters = $parameters ?? $this->resolveParameters($callable->getParameters() ?? null, $definitions);
 
         return $callable->invokeArgs($parameters);
     }
@@ -96,7 +97,7 @@ class Reflector
      *
      * @return mixed|null
      */
-    private function resolveCallableFromCache(string $name, callable $closure, ?\ReflectionFunction $callable = null)
+    public function resolveCallableFromCache(string $name, callable $closure, ?\ReflectionFunction $callable = null)
     {
         if($this->cache->has(self::CACHE_CALLABLE . $name)) {
             return $this->cache->get(self::CACHE_CALLABLE . $name);
@@ -133,7 +134,7 @@ class Reflector
      *
      * @return object
      */
-    private function resolveClass(\ReflectionClass $class)
+    public function resolveClass(\ReflectionClass $class)
     {
         $definitions = $this->container->isDefined($class->getName())
             ? $this->container->getDefiniition($class->getName()) : null;
@@ -150,7 +151,7 @@ class Reflector
      *
      * @return mixed|null|object
      */
-    private function resolveClassFromCache(string $class, ?\ReflectionClass $object = null)
+    public function resolveClassFromCache(string $class, ?\ReflectionClass $object = null)
     {
         if($this->cache->has($class)) {
             return $this->cache->get($class);

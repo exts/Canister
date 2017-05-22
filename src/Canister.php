@@ -3,6 +3,7 @@ namespace Canister;
 
 use Canister\Exceptions\OffsetNotFound;
 use Canister\Exceptions\OffsetNotValid;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class Canister
@@ -41,6 +42,9 @@ class Canister extends Container implements CanisterInterface
 
         //store reference of the container inside itself, can be overridden
         $this->instance($this);
+
+        //set container interface alias to current container
+        $this->alias(ContainerInterface::class, get_class($this));
 
         //store reflector inside container aswell
         $this->instance($this->reflector);

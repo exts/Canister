@@ -32,6 +32,7 @@ class Definition
      */
     public function __construct($type, $value)
     {
+        $this->type = !in_array($type, [self::VALUE, self::CONTAINER]) ? self::VALUE : $type;
         $this->value = $value;
     }
 

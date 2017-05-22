@@ -41,6 +41,9 @@ class Canister extends Container implements CanisterInterface
 
         //store reference of the container inside itself, can be overridden
         $this->instance($this);
+
+        //store reflector inside container aswell
+        $this->instance($this->reflector);
     }
 
     /**

@@ -86,12 +86,12 @@ class Canister extends Container implements CanisterInterface
         $alias = $this->isAlias($key) ? $this->getAlias($key) : $key;
 
         //automatically resolve classes if they exist even if they don't exist in our reflector cache
-        if(!$this->has($key) && class_exists($alias, true)) {
+        if(!$this->has($alias) && class_exists($alias, true)) {
             return $this->reflector->resolveClassString($alias, $this->isFactory($alias));
         }
 
         //return basic container value
-        return $this->offsetGet($key);
+        return $this->offsetGet($alias);
     }
 
     /**
